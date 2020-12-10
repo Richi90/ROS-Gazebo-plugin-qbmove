@@ -1,0 +1,52 @@
+cmake_minimum_required(VERSION 3.0.2)
+project(advanced_plugin)
+
+add_compile_options(-std=c++11)
+
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  gazebo_ros
+  rospy
+  std_msgs
+)
+
+find_package(gazebo REQUIRED)
+
+catkin_package(
+   INCLUDE_DIRS include
+   LIBRARIES advanced_plugin
+   CATKIN_DEPENDS gazebo_ros roscpp rospy std_msgs
+   DEPENDS roscpp gazebo_ros
+#  DEPENDS system_lib
+)
+
+link_directories(${GAZEBO_LIBRARY_DIRS})
+
+include_directories(
+  include
+  ${Boost_INCLUDE_DIR}
+  ${catkin_INCLUDE_DIRS}
+  ${GAZEBO_INCLUDE_DIRS}
+)
+
+## Declare a C++ library
+add_library(${PROJECT_NAME}
+   src/advanced_plugin.cpp
+)
+
+## Specify libraries to link a library or executable target against
+target_link_libraries(${PROJECT_NAME}
+   ${catkin_LIBRARIES} 
+   ${GAZEBO_LIBRARIES}
+ )
+
+## Declare a C++ library
+add_library(advanced_motors_plugin
+   src/advanced_motors_plugin.cpp
+)
+
+## Specify libraries to link a library or executable target against
+target_link_libraries(advanced_motors_plugin
+   ${catkin_LIBRARIES} 
+   ${GAZEBO_LIBRARIES}
+ )

@@ -1,0 +1,183 @@
+# This YAML file must contains the configuration of each mesh to properly build the URDF automagically.
+# The aim of this additional file is to encapsulate all the physical properties in a single place without hiding them
+# in a long URDF structure.
+#
+# Note: there is no need to modify this file unless you hack the qbmove physical mechanism. Nonetheless it is
+#       recommended to create a distinct YAML file for each version of the qbmove (this helps with versioning and
+#       leaves the default configuration as is).
+#
+# Brief description:
+# * The `default` group holds the anchors for the common default settings, i.e. avoid annoying repetitions.
+# * The `qb_move` group contains the current properties to build the URDF correctly.
+# * The `flanges` group holds the anchors for the common settings for the mounting flanges.
+
+default:
+  parameters:
+    axis: &axis "0 1 0"
+    dynamics: &dynamics
+      damping: 0.0
+      friction: 0.0
+    effort_limit: &effort 10000
+    velocity_limit: &velocity 10000
+    limits: &limits
+      lower: -2.876
+      upper: 2.876
+      effort: *effort
+      velocity: *velocity
+
+  cube: &cube
+    mesh: ""
+    mesh_collision: ""
+    position: "0 0 0"
+    orientation: "0 0 0"
+    inertial:
+      mass: 0.6
+      origin: "0.0 0.0 0.05"
+      inertia:  # l=0.1m
+        ixx: 0.001
+        ixy: 0.0
+        ixz: 0.0
+        iyy: 0.001
+        iyz: 0.0
+        izz: 0.001
+
+  flange: &flange
+    mesh: ""
+    mesh_collision: ""
+    position: "0 0 0"
+    orientation: "0 0 0"
+    inertial:
+      mass: 0.14  # EDITED RICCARDO MENGACCI
+      origin: "0.0 0.0 0.0"
+      inertia:
+        ixx: 0.001 # EDITED RICCARDO MENGACCI
+        ixy: 0.0
+        ixz: 0.0
+        iyy: 0.001 # EDITED RICCARDO MENGACCI
+        iyz: 0.0
+        izz: 0.001 # EDITED RICCARDO MENGACCI
+
+  motor: &motor
+    mesh: ""
+    mesh_collision: ""
+    position: "0 0 0"
+    orientation: "0 0 0"
+    axis: *axis
+    dynamics: *dynamics
+    limits: *limits
+    inertial:
+      mass: 0.05
+      origin: "0.0 0.0 0"
+      inertia:  # r=0.01m, h=0.05
+        ixx: 0.000012
+        ixy: 0.0
+        ixz: 0.0
+        iyy: 0.000012
+        iyz: 0.0
+        izz: 0.000000555 # EDITED RICCARDO MENGACCI
+        # izz: 0.000003 
+
+  shaft: &shaft
+    mesh: ""
+    mesh_collision: ""
+    position: "0 0 0"
+    orientation: "0 0 0"
+    axis: *axis
+    dynamics: *dynamics
+    limits: *limits
+    inertial:
+      mass: 0.05
+      origin: "0.0 0.0 0.005"
+      inertia:  # r=0.03m, h=0.01
+        ixx: 0.000012
+        ixy: 0.0
+        ixz: 0.0
+        iyy: 0.000012
+        iyz: 0.0
+        izz: 0.000023
+
+  stiffness_preset: &stiffness_preset
+    mesh: ""
+    mesh_collision: ""
+    dynamics: *dynamics
+    limits:
+      lower: 0.0
+      upper: 1.0
+      effort: *effort
+      velocity: *velocity
+
+
+qbmove:
+  cube:
+    << : *cube
+    mesh: "qbmove_frame"
+    mesh_collision: "qbmove_frame_collision"
+
+  motor_1:
+    << : *motor
+    position: "0.02 0.02 0.02"
+
+  motor_2:
+    << : *motor
+    position: "-0.02 -0.02 0.02"
+
+  shaft:
+    << : *shaft
+    mesh: "qbmove_pulley"
+    mesh_collision: "qbmove_pulley_collision"
+    position: "0 0 0.056"
+    orientation: "1.57 0 0"
+
+  stiffness_preset:
+    << : *stiffness_preset
+
+
+flanges:
+  base_flange:
+    << : *flange
+    mesh: "qb_base_flange"
+    mesh_collision: "qb_base_flange_collision"
+    position: "0 0 0"
+    orientation: "0 0 0"
+
+  flat_flange:
+    << : *flange
+    mesh: "qb_flat_flange"
+    mesh_collision: "qb_flat_flange_collision"
+    position: "0 0.0225 0"
+    orientation: "-1.57 0 0"
+
+  double_flat_flange:
+    << : *flange
+    mesh: "qb_double_flat_flange"
+    mesh_collision: "qb_double_flat_flange_collision"
+    position: "0 0 0"
+    orientation: "0 0 0"
+
+  c_flange_plate:
+    << : *flange
+    mesh: "qb_c_flange"
+    mesh_collision: "qb_c_flange_collision"
+    position: "0 0 0"
+    orientation: "0 0 0"
+
+  c_flange_axis:
+    << : *flange
+    mesh: "qb_c_flange"
+    mesh_collision: "qb_c_flange_collision"
+    position: "0 -0.024 0.056"
+    orientation: "0 0 1.57"
+
+  finger_down:
+    << : *flange
+    mesh: "qbmove_finger_down"
+    mesh_collision: "qbmove_finger_down_collision"
+    position: "-0.033 0 0.033"
+    orientation: "1.57 1.57 1.57"
+
+  finger_up:
+    << : *flange
+    mesh: "qbmove_finger_up"
+    mesh_collision: "qbmove_finger_up_collision"
+    position: "0 0.0165 0"
+    orientation: "-1.57 -1.57 0"
