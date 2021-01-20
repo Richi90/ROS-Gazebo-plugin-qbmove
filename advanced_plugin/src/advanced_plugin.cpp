@@ -6,6 +6,7 @@
 #include <math.h>
 #include <string>
 #include <ros/ros.h>
+#include <advanced_plugin/state_info.h>
 
 using namespace gazebo;
 using namespace std;
@@ -38,7 +39,6 @@ void advancedPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   // Retrieve namespace and control mode from a configuration file
   ros::param::get("namespace", this->ns_name);
-  ros::param::get("control_type", this->cont_type);
   ros::param::get("T_sample", this->T_sample);
 
   // Set node's rate
@@ -46,6 +46,10 @@ void advancedPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   // Retrieve joint identifier and control mode from urdf tags
   this->joint_name =_sdf->GetElement("joint")->Get<string>();
+  this->cont_type =_sdf->GetElement("control_type")->Get<int>();
+  this->flag_pub_el_tau =_sdf->GetElement("pub_eltau")->Get<bool>();
+  this->flag_pub_state =_sdf->GetElement("pub_state")->Get<bool>();
+  this->flag_sub_ext_tau =_sdf->GetElement("sub_ext_tau")->Get<bool>();
 
   // Everything-is-fine message
   std::string ok_msg = "qbmove Advanced plugin on " + joint_name + " started with controller type [" + std::to_string(cont_type) + "]!";
@@ -96,18 +100,28 @@ void advancedPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     cmd_ref2_name = ns_name + "/" + joint_name.erase(len_name-11, 11) + "motor_2_joint/reference_2";
   }
 
+  // Compose string for the subscriber of external torque
+  ext_tau_sub_name = ns_name + "/" + joint_name + "/ext_tau";
+
   // Subscribers and Publishers for the joint states and command
   sub_1 = n.subscribe(cmd_ref1_name, 10, &advancedPlugin::getRef1_callback, this);
   sub_2 = n.subscribe(cmd_ref2_name, 10, &advancedPlugin::getRef2_callback, this);
-  pub_1 = n.advertise<std_msgs::Float64>(cmd_pub1_name, 500);
-  pub_2 = n.advertise<std_msgs::Float64>(cmd_pub2_name, 500);
-  pub_link = n.advertise<std_msgs::Float64>(link_pub_name, 500);
+  if (this->flag_sub_ext_tau)
+  {
+    sub_ext = n.subscribe(ext_tau_sub_name, 10, &advancedPlugin::getExtTau_callback, this);
+  } 
+  if (this->flag_pub_el_tau)
+  {
+    pub_1 = n.advertise<std_msgs::Float64>(cmd_pub1_name, 500);
+    pub_2 = n.advertise<std_msgs::Float64>(cmd_pub2_name, 500);
+  }
+  if (this->flag_pub_state)
+  {
+    pub_state = n.advertise<advanced_plugin::state_info>(link_pub_name, 500);
+  }
 
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(boost::bind(&advancedPlugin::OnUpdate, this, _1));  
 
-    // DEBUG
-/*  std::cout << cmd_ref1_name << std::endl;
-  std::cout << cmd_ref2_name << std::endl;*/
 }
 
 // Saturation for elastic deflections
@@ -122,7 +136,7 @@ double advancedPlugin::saturate(double val, double max_val)
     return val;
 }
 
-// Elastic function model for qbMove Advanced (datasheet)
+// Elastic function torque model for qbMove Advanced (datasheet)
 double advancedPlugin::elastic_fun(double link, double theta)
 {
     double tau_el, defl;
@@ -132,6 +146,18 @@ double advancedPlugin::elastic_fun(double link, double theta)
 
     defl = saturate(link - theta, 0.8);
     return tau_el = -k*sinh(a*defl);
+}
+
+// Elastic function stiffness model for qbMove Advanced (datasheet)
+double advancedPlugin::stiffness_fun(double link, double theta)
+{
+    double sig_el, defl;
+    // Elastic model parameters
+    double a = 6.7328;
+    double k = 0.0222;
+
+    defl = saturate(link - theta, 0.8);
+    return sig_el = a*k*cosh(a*defl);
 }
 
 // Subscriber callbacks references
@@ -144,6 +170,12 @@ void advancedPlugin::getRef2_callback(const std_msgs::Float64& val_2)
     this->ref_2 = val_2;
 }
 
+// Subscriber callback for external torque
+void advancedPlugin::getExtTau_callback(const std_msgs::Float64& e_tau)
+{
+    this->ext_tau = e_tau;
+}
+
 // Switch among controllers
 double advancedPlugin::SwitchControl(int cont_sel)
 {
@@ -152,6 +184,8 @@ double advancedPlugin::SwitchControl(int cont_sel)
       // Elstic torque computation with additional damping added (required for a better simulation)
       this->elastic_tau1.data = advancedPlugin::elastic_fun(this->q, this->ref_1.data);
       this->elastic_tau2.data = advancedPlugin::elastic_fun(this->q, this->ref_2.data);
+      this->stiffness_1.data = advancedPlugin::stiffness_fun(this->q, this->ref_1.data);
+      this->stiffness_2.data = advancedPlugin::stiffness_fun(this->q, this->ref_2.data);
       return this->elastic_tau1.data + this->elastic_tau2.data - Damp_link*this->dq; // joint torque
       // std::cout << "Control mode: motor positions! ----- ";
 
@@ -166,6 +200,8 @@ double advancedPlugin::SwitchControl(int cont_sel)
       th2_temp = this->ref_1.data - this->ref_2.data;
       this->elastic_tau1.data = advancedPlugin::elastic_fun(this->q, th1_temp);
       this->elastic_tau2.data = advancedPlugin::elastic_fun(this->q, th2_temp);
+      this->stiffness_1.data = advancedPlugin::stiffness_fun(this->q, th1_temp);
+      this->stiffness_2.data = advancedPlugin::stiffness_fun(this->q, th2_temp);
       return this->elastic_tau1.data + this->elastic_tau2.data - Damp_link*this->dq; // joint torque
       //std::cout << "Control mode: eq.pos/preset! ----- ";
 
@@ -183,27 +219,33 @@ double advancedPlugin::SwitchControl(int cont_sel)
 void advancedPlugin::OnUpdate(const common::UpdateInfo & /*_info*/)
 {
 
+  // Retrieve joint position and velocity
   this->q = this->joint->GetAngle(0).Radian();
   this->dq = this->joint->GetVelocity(0);
 
+  // Compose the elstic torque and stiffness according to the control mode selected
   this->joint_tau.data = advancedPlugin::SwitchControl(this->cont_type);
+  this->joint_stiff.data = this->stiffness_1.data + this->stiffness_2.data;
 
-  // DEBUG // std::cout << this->joint_tau.data << "\t" << this->cont_type << std::endl;
-  this->joint->SetForce(0, this->joint_tau.data);
+  // Set torque to the joint
+  this->joint->SetForce(0, this->joint_tau.data - this->ext_tau.data);
 
   // Publish elastic torque for driving motors
-  pub_1.publish(this->elastic_tau1);
-  pub_2.publish(this->elastic_tau2);
+  if (this->flag_pub_el_tau)
+  {
+    pub_1.publish(this->elastic_tau1);
+    pub_2.publish(this->elastic_tau2);
+  }
 
-  // Publish link position
-  this->link_q.data = this->q;
-  pub_link.publish(this->link_q);
-
-  // std::cout << this->link_q.data << std::endl;
-/*  // DEBUG
-  std::cout << "------------------------------------------------------------------------------------------" << std::endl;
-  std::cout << this->joint_tau.data << "\t" <<  this->ref_1.data  << "\t" << this->ref_2.data << "\t" << this->q << "\t" << std::endl;
-  std::cout << this->elastic_tau1.data << "\t" <<  this->elastic_tau2.data  << std::endl;
-  std::cout << "------------------------------------------------------------------------------------------" << std::endl;
-*/
+  // Publish whole joint state
+  if (this->flag_pub_state)
+  {
+    this->joint_info.tau = this->joint_tau.data;
+    this->joint_info.stiff = this->joint_stiff.data;
+    this->joint_info.q = this->q;
+    this->joint_info.dq = this->dq;
+    this->joint_info.ref_1 = this->ref_1.data;
+    this->joint_info.ref_2 = this->ref_2.data;
+    pub_state.publish(this->joint_info);
+  }
 }

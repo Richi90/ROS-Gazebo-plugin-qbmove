@@ -125,19 +125,20 @@ double advancedMotorsPlugin::elastic_fun(double link, double theta)
 void advancedMotorsPlugin::OnUpdate(const common::UpdateInfo & /*_info*/)
 {
   // Retrieve motor position and velocity
-  this->th.data = this->joint->GetAngle(0).Radian();
+  this->th.data = this->joint->GetAngle(0).Radian(); 
+  this->th_red.data = this->th.data*(pow(gear_ratio,2));
   this->dth.data = this->joint->GetVelocity(0);
+  
+  this->tau_elastic_temp = advancedMotorsPlugin::elastic_fun(this->link_q.data, this->th.data);
+
+  // Compute motor torque from commanded, elastic and damping (motor dynamics emulated!)
+  this->mot_tau = this->mot_cmd_tau.data - this->Damp_mot*this->dth.data; // /gear_ratio
 
   // Set motor torque to the joint
   this->joint->SetForce(0, this->mot_tau);
-  
-  double tau_elastic_temp = advancedMotorsPlugin::elastic_fun(this->link_q.data, this->th.data);
-
-  // Compute motor torque from commanded, elastic and damping (motor dynamics emulated!)
-  this->mot_tau = - this->Damp_mot*this->dth.data;//( this->mot_cmd_tau.data - this->el_tau.data)/(pow(gear_ratio,2));//  ;
 
   // Publish motor reference to the other plugin for computing elastic torque and drive the VSA link   
   pub.publish(this->th);
 
-  //std::cout << this->link_q.data << std::endl;
+  std::cout << tau_elastic_temp << "\t" << this->el_tau.data << "\t" << this->link_q.data  << std::endl;
 }

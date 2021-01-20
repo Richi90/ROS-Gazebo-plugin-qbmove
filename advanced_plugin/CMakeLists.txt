@@ -8,14 +8,25 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_ros
   rospy
   std_msgs
+  message_generation
 )
 
 find_package(gazebo REQUIRED)
 
+add_message_files(
+    FILES
+  state_info.msg
+)
+
+generate_messages(
+  DEPENDENCIES
+    std_msgs
+)
+
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES advanced_plugin
-   CATKIN_DEPENDS gazebo_ros roscpp rospy std_msgs
+   CATKIN_DEPENDS gazebo_ros roscpp rospy std_msgs message_runtime
    DEPENDS roscpp gazebo_ros
 #  DEPENDS system_lib
 )
@@ -49,4 +60,5 @@ add_library(advanced_motors_plugin
 target_link_libraries(advanced_motors_plugin
    ${catkin_LIBRARIES} 
    ${GAZEBO_LIBRARIES}
- )
+)
+

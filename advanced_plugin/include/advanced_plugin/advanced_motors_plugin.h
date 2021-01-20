@@ -42,7 +42,8 @@ namespace gazebo{
     // Messages to subscribe on
     std_msgs::Float64 mot_cmd_tau; // commanded from user
     std_msgs::Float64 el_tau;
-    std_msgs::Float64 th, dth;     // motor variables and reference to pass to the other plugin
+    std_msgs::Float64 th, dth;     // motor variables and reference 
+    std_msgs::Float64 th_red;      // motor variable reduced by the gearbox to pass to the other plugin
 
     // Link position
     std_msgs::Float64 link_q;
@@ -67,7 +68,8 @@ namespace gazebo{
     double mot_tau;
     double Damp_mot = 0.00000742;
     int gear_ratio = 205;
-
+    double tau_elastic_temp;
+    
     // Sample time
     double T_sample;
 
