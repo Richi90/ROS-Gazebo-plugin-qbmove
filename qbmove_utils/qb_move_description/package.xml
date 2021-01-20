@@ -1,0 +1,20 @@
+<package format="2">
+  <name>qb_move_description</name>
+  <version>2.1.3</version>
+  <description>
+    This package contains the ROS description for qbrobotics® qbmove device.
+  </description>
+  <author>qbrobotics®</author>
+  <maintainer email="alessandro.tondo@qbrobotics.com">Alessandro Tondo</maintainer>
+  <license>BSD 3-Clause</license>
+
+  <url type="bugtracker">https://bitbucket.org/qbrobotics/qbmove-ros/issues</url>
+  <url type="repository">https://bitbucket.org/qbrobotics/qbmove-ros</url>
+  <url type="website">http://wiki.ros.org/qb_move_description</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+    <architecture_independent/>
+  </export>
+</package>

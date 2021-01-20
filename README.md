@@ -15,7 +15,7 @@ There are two ways of using the **ROS-Gazebo-plugin-qbmove** properly:
 For the first solution, the advanced plugin must be inserted directly into the URDF, associated to each joints of your robot (see below).
 
 For the second solution the advanced plugin is embedded into the **ROS-qbmove** (or **qbmove-ros**) package, thus it is required. 
-You can find the **qbmove-ros** package inside the _/qbmove_utils_ folder. (**NOTE:** the package has been modified w.r.t. the qbRobotics one in order to include the plugin!)
+In order to include the plugin, you have to replace the _/qbmove_description_ folder inside the **qbmove-ros** package with the one inside the _/qbmove_utils_ folder. (**NOTE:** that package has been modified w.r.t. the qbRobotics!)
 
 # URDF template 
 You can find a simple usage template inside the _/example/template_description_ folder. 
@@ -37,7 +37,7 @@ The plugin can be inserted to each revolute (or continous) joint (_your_joint_) 
    ```xml
     <gazebo>
         <plugin name="advanced_vsa_j1" filename="libadvanced_plugin.so">
-            <joint>your_joint</joint>
+            <joint>your_joint_name</joint>
             <control_type>your_control_mode</control_type>
             <pub_eltau>true</pub_eltau>
             <pub_state>true</pub_state>

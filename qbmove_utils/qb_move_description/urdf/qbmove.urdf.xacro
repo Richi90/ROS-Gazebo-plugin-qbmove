@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<robot name="qbmove" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find qb_move_description)/urdf/qbmove.utils.xacro" ns="qbmove"/>
+  <xacro:arg name="namespace" default="qbmove"/>
+
+  <link name="root_link"/>
+  <xacro:qbmove.build_flange_from_yaml flange="base_flange" namespace="$(arg namespace)" parent="root"/>
+	<xacro:qbmove.build_move_from_yaml namespace="$(arg namespace)" parent="$(arg namespace)_base_flange">
+    <origin xyz="0.033 0 0.033" rpy="0 -1.57 0"/>
+  </xacro:qbmove.build_move_from_yaml>
+  <xacro:qbmove.build_flange_from_yaml flange="finger_up" namespace="$(arg namespace)" parent="$(arg namespace)_shaft"/>
+  <xacro:qbmove.build_flange_from_yaml flange="finger_down" namespace="$(arg namespace)" parent="$(arg namespace)_cube"/>
+
+</robot>
