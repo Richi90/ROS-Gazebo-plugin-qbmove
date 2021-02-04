@@ -125,7 +125,7 @@ double advancedMotorsPlugin::elastic_fun(double link, double theta)
 void advancedMotorsPlugin::OnUpdate(const common::UpdateInfo & /*_info*/)
 {
   // Retrieve motor position and velocity
-  this->th.data = this->joint->GetPosition(0); 
+  this->th.data = this->joint->Position(0); 
   this->th_red.data = this->th.data*(pow(gear_ratio,2));
   this->dth.data = this->joint->GetVelocity(0);
   
