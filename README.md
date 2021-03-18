@@ -34,6 +34,8 @@ and is loaded inside the **launch** file with the following
 
 ## Plugin insertion 
 The plugin can be inserted to each revolute (or continous) joint (_your_joint_) of your robot as follows
+
+### Advanced plugin case:
    ```xml
     <gazebo>
         <plugin name="advanced_vsa_j1" filename="libadvanced_plugin.so">
@@ -45,6 +47,19 @@ The plugin can be inserted to each revolute (or continous) joint (_your_joint_) 
         </plugin>
     </gazebo>
   ```
+### SEA plugin case:
+   ```xml
+    <gazebo>
+        <plugin name="sea_j1" filename="libsea_plugin.so">
+            <joint>your_joint_name</joint>
+            <namespace>your_ns</namespace>
+            <stiffness>100</stiffness>
+            <pub_state>true</pub_state>
+            <sub_ext_tau>true</sub_ext_tau>
+        </plugin>
+    </gazebo>
+  ```
+  
 ## Available topics
 According to the control mode tag seleceted, different topics are generated to allow publishing the relative references.
 
