@@ -35,7 +35,7 @@ and is loaded inside the **launch** file with the following
 ## Plugin insertion 
 The plugin can be inserted to each revolute (or continous) joint (_your_joint_) of your robot as follows
 
-### Advanced plugin case:
+#### Advanced plugin case:
    ```xml
     <gazebo>
         <plugin name="advanced_vsa_j1" filename="libadvanced_plugin.so">
@@ -47,7 +47,7 @@ The plugin can be inserted to each revolute (or continous) joint (_your_joint_) 
         </plugin>
     </gazebo>
   ```
-### SEA plugin case:
+#### SEA plugin case:
    ```xml
     <gazebo>
         <plugin name="sea_j1" filename="libsea_plugin.so">
@@ -61,9 +61,10 @@ The plugin can be inserted to each revolute (or continous) joint (_your_joint_) 
   ```
   
 ## Available topics
-According to the control mode tag seleceted, different topics are generated to allow publishing the relative references.
+According to the plugin and the tags seleceted, different topics are generated to allow publishing the relative references.
 
-The available controllers and the relative topics are as follows:
+#### Advanced plugin case:
+Here in the control mode tag, the available controllers and the relative topics are as follows:
 - _your_control_mode_ == 0, the two references are used as motor positions, topic names:
    ```
    /your_namespace/your_joint_name/reference_1
@@ -79,8 +80,15 @@ The available controllers and the relative topics are as follows:
    /your_namespace/your_joint_name/torque
    /your_namespace/your_joint_name/disabled
    ```
+   
+#### SEA plugin case:
+In this case, the only topic generated to command the motor reference is the following
+   ```
+   /your_namespace/your_joint_name/theta_command
+   ```
 
-The remaining tags are used to enable other useful publishers, one for publishing the value of the elastic torques, in the following topics
+#### Common:
+The remaining tags are used to enable other useful publishers, one for publishing the value of the elastic torques (not available in SEA mode), in the following topics
    ```
    /your_namespace/your_joint_name/tau_el1_state
    /your_namespace/your_joint_name/tau_el2_state
