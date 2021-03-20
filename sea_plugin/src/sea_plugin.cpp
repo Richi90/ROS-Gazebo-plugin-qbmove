@@ -37,6 +37,7 @@ void seaPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->joint_name =_sdf->GetElement("joint")->Get<string>();
   this->ns_name =_sdf->GetElement("namespace")->Get<string>(); // TODO: move out, passing it as ROS parameters
   this->K =_sdf->GetElement("stiffness")->Get<double>();
+  this->flag_pub_el_tau =_sdf->GetElement("pub_eltau")->Get<bool>();
   this->flag_pub_state =_sdf->GetElement("pub_state")->Get<bool>();
   this->flag_sub_ext_tau =_sdf->GetElement("sub_ext_tau")->Get<bool>();
 
@@ -47,8 +48,11 @@ void seaPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   // Retrieve joint
   this->joint = this->model->GetJoint(joint_name);
 
-  // Compose the name of the publisher
+  // Compose the name of the motor position publisher
   cmd_sub_name = ns_name + "/" + joint_name + "/theta_command";
+
+  // Compose the name of the elastic torque publisher
+  el_pub_name = ns_name + "/" + joint_name + "/tau_el_state";
 
   // Compose string name for the state publisher
   link_pub_name = ns_name + "/" + joint_name + "/state";
@@ -58,7 +62,6 @@ void seaPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   // Subscribers and Publishers for the joint states and command
   sub = n.subscribe(cmd_sub_name, 10, &seaPlugin::getRef_callback, this);
-  //pub = n.advertise<std_msgs::Float64>(cmd_pub_name, 500);
 
   if (this->flag_sub_ext_tau)
   {
@@ -68,6 +71,10 @@ void seaPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   if (this->flag_pub_state)
   {
     pub_state = n.advertise<sea_plugin::state_info>(link_pub_name, 500);
+  }
+  if (this->flag_pub_el_tau)
+  {
+    pub_eltau = n.advertise<std_msgs::Float64>(el_pub_name, 500);
   }
 
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(boost::bind(&seaPlugin::OnUpdate, this, _1));  
@@ -93,11 +100,18 @@ void seaPlugin::OnUpdate(const common::UpdateInfo & /*_info*/)
   this->q = this->joint->GetAngle(0).Radian();
   this->dq = this->joint->GetVelocity(0);
 
-  // Compute the elastic torque
-  this->joint_tau.data = this->K*(this->joint_ref.data - this->q) - this->Damp*this->dq;
+  // Compute the elastic and link torques
+  this->elastic_tau.data = this->K*(this->joint_ref.data - this->q);
+  this->joint_tau.data = this->elastic_tau.data - this->Damp*this->dq;
 
   // Set to the joint elastic torque
   this->joint->SetForce(0, this->joint_tau.data - this->ext_tau.data);
+
+  // Publish elastic torque for driving motor
+  if (this->flag_pub_el_tau)
+  {
+    pub_eltau.publish(this->elastic_tau);
+  }
 
   // Publish whole joint state
   if (this->flag_pub_state)
