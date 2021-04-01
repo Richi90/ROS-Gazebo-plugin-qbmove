@@ -71,7 +71,7 @@ void advancedPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   cmd_pub2_name = ns_name + "/" + joint_name + "/tau_el2_state";
 
   // Compose string name for the state publisher
-  link_pub_name = ns_name + "/" + joint_name + "/state";
+  link_pub_name = ns_name + "/" + joint_name + "/link_state";
 
   // Compose string name for the subscribers removing last words from joint name (SUPPOSING THAT QB NODE CONVENTION IS USED) 
   //    and add the suffix according to the config file!! 

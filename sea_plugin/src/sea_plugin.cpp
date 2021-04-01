@@ -55,7 +55,7 @@ void seaPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   el_pub_name = ns_name + "/" + joint_name + "/tau_el_state";
 
   // Compose string name for the state publisher
-  link_pub_name = ns_name + "/" + joint_name + "/state";
+  link_pub_name = ns_name + "/" + joint_name + "/link_state";
 
   // Compose string for the subscriber of external torque
   ext_tau_sub_name = ns_name + "/" + joint_name + "/ext_tau";

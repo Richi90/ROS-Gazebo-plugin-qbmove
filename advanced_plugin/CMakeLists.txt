@@ -40,25 +40,3 @@ include_directories(
   ${GAZEBO_INCLUDE_DIRS}
 )
 
-## Declare a C++ library
-add_library(${PROJECT_NAME}
-   src/advanced_plugin.cpp
-)
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(${PROJECT_NAME}
-   ${catkin_LIBRARIES} 
-   ${GAZEBO_LIBRARIES}
- )
-
-## Declare a C++ library
-add_library(advanced_motors_plugin
-   src/advanced_motors_plugin.cpp
-)
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(advanced_motors_plugin
-   ${catkin_LIBRARIES} 
-   ${GAZEBO_LIBRARIES}
-)
-
