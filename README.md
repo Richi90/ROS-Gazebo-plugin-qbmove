@@ -54,6 +54,7 @@ The plugin can be inserted to each revolute (or continous) joint (_your_joint_) 
             <joint>your_joint_name</joint>
             <namespace>your_ns</namespace>
             <stiffness>100</stiffness>
+            <pub_eltau>true</pub_eltau>
             <pub_state>true</pub_state>
             <sub_ext_tau>true</sub_ext_tau>
         </plugin>
