@@ -13,6 +13,7 @@
 # define PI 3.14159
 
 int joints_n;
+double T_sample;
 std::string ns_name;
 
 std::vector<ros::Publisher> pub_ref1, pub_ref2;
@@ -29,11 +30,11 @@ std::vector<double> th_1, th_2, dth_1, dth_2, tau_1, tau_2;
 std_msgs::Float64 msg_ref1, msg_ref2;
 std_msgs::Float64MultiArray ref_1, ref_2;
 
-std::vector<std::string> joint_name;
+std::vector<std::string> joint_name, ref1_topic_name, ref2_topic_name;
 std::vector<std::string> topics_ref1, topics_ref2, topics_state;
 std::vector<std::string> mot1_state, mot2_state;
 std::string topic_state_name;
-std::string ref1_topic_name, ref2_topic_name, topic_mot1state_name, topic_mot2state_name;
+std::string  topic_mot1state_name, topic_mot2state_name;
 
 sensor_msgs::JointState robot_state, state_1, state_2;
 
@@ -88,6 +89,12 @@ void Initialization(ros::NodeHandle n_)
     ROS_ERROR("Specify number of joint");
     exit(1);
   }
+  // Check if sample time is passed and get it
+  if (!n_.getParam("T_sample", T_sample))
+  {
+    ROS_ERROR("Specify the sample time");
+    exit(1);
+  }
 
   // Resize array variables
   pub_ref1.resize(joints_n);
@@ -96,6 +103,8 @@ void Initialization(ros::NodeHandle n_)
   sub_mot1_state.resize(joints_n);
   sub_mot2_state.resize(joints_n);
   joint_name.resize(joints_n);
+  ref1_topic_name.resize(joints_n);
+  ref2_topic_name.resize(joints_n);
   topics_ref1.resize(joints_n);
   topics_ref2.resize(joints_n);
   topics_state.resize(joints_n);
@@ -142,15 +151,15 @@ void Initialization(ros::NodeHandle n_)
   // Create the subscriber topics' names
   for(int i = 0; i<joints_n; i++)
   {
-    topics_ref1[i]  = "/" +  ns_name + "/" + joint_name[i] + ref1_topic_name;
-    topics_ref2[i]  = "/" +  ns_name + "/" + joint_name[i] + ref2_topic_name;
+    topics_ref1[i]  = "/" +  ns_name + "/" + joint_name[i] + ref1_topic_name[i];
+    topics_ref2[i]  = "/" +  ns_name + "/" + joint_name[i] + ref2_topic_name[i];
     topics_state[i] = "/" +  ns_name + "/" + joint_name[i] + "/link_state";
     mot1_state[i] = "/" +  ns_name + "/" + joint_name[i] + "/motor_1_state";
     mot2_state[i] = "/" +  ns_name + "/" + joint_name[i] + "/motor_2_state";
   }
   topic_state_name = "/" +  ns_name + "/robot_state";
-  topic_mot1state_name = "/" +  ns_name + "/state_1";
-  topic_mot2state_name = "/" +  ns_name + "/state_2";
+  topic_mot1state_name = "/" +  ns_name + "/motor_1_state";
+  topic_mot2state_name = "/" +  ns_name + "/motor_2_state";
 
   // Advertise topics' publishers
   for(int i = 0; i<joints_n; i++)
@@ -184,16 +193,14 @@ void Initialization(ros::NodeHandle n_)
 //-----------------------------------------------------
 int main(int argc, char **argv)
 {
-  double rateHZ = 100;
-  
   ros::init(argc, argv, "plugin_manager_node");
   
   ros::NodeHandle n_;
   
-  ros::Rate r(rateHZ);
-  
   Initialization(n_);
  
+  ros::Rate r(1/T_sample);
+
   while(ros::ok())
   {
 
@@ -204,6 +211,12 @@ int main(int argc, char **argv)
 
       pub_ref1[i].publish(msg_ref1);
       pub_ref2[i].publish(msg_ref2);
+
+      // assign stamp time
+      ros::Time act_time = ros::Time::now();
+      state_1.header.stamp = act_time;
+      state_2.header.stamp = act_time;
+      robot_state.header.stamp = act_time;
 
       // Fill data for the robot's link
       robot_state.name[i] = joint_name[i];

@@ -220,7 +220,7 @@ void advancedPlugin::OnUpdate(const common::UpdateInfo & /*_info*/)
 {
 
   // Retrieve joint position and velocity
-  this->q = this->joint->GetAngle(0).Radian();
+  this->q = this->joint->Position(0);
   this->dq = this->joint->GetVelocity(0);
 
   // Compose the elstic torque and stiffness according to the control mode selected

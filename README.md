@@ -101,4 +101,3 @@ Finally, it is possible to apply an external torque on the joint with the follow
    ```
    /your_namespace/your_joint_name/ext_tau
    ```
-

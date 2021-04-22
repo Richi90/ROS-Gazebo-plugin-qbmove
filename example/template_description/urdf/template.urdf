@@ -74,16 +74,18 @@
         #
         # The two other tags enable the generation and publication of additional topics: the state publisher and 
         #      enable the subscription to external torque topic
-
     -->
     <gazebo>
         <plugin name="sea_j1" filename="libsea_plugin.so">
             <joint>J1</joint>  
             <namespace>your_ns</namespace>
             <stiffness>100</stiffness>
+            <pub_eltau>true</pub_eltau>
             <pub_state>true</pub_state>
             <sub_ext_tau>true</sub_ext_tau>
         </plugin>
     </gazebo>
+
+
 
 </robot>

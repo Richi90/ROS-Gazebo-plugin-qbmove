@@ -37,7 +37,10 @@ void seaPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   this->joint_name =_sdf->GetElement("joint")->Get<string>();
   this->ns_name =_sdf->GetElement("namespace")->Get<string>(); // TODO: move out, passing it as ROS parameters
   this->K =_sdf->GetElement("stiffness")->Get<double>();
+<<<<<<< HEAD
   this->flag_pub_el_tau =_sdf->GetElement("pub_eltau")->Get<bool>();
+=======
+>>>>>>> 2bfa08a76069721e8b4fe10c48d1ddccbe94bd32
   this->flag_pub_state =_sdf->GetElement("pub_state")->Get<bool>();
   this->flag_sub_ext_tau =_sdf->GetElement("sub_ext_tau")->Get<bool>();
 
@@ -48,6 +51,7 @@ void seaPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   // Retrieve joint
   this->joint = this->model->GetJoint(joint_name);
 
+<<<<<<< HEAD
   // Compose the name of the motor position publisher
   cmd_sub_name = ns_name + "/" + joint_name + "/theta_command";
 
@@ -56,12 +60,23 @@ void seaPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
 
   // Compose string name for the state publisher
   link_pub_name = ns_name + "/" + joint_name + "/link_state";
+=======
+  // Compose the name of the publisher
+  cmd_sub_name = ns_name + "/" + joint_name + "/theta_command";
+
+  // Compose string name for the state publisher
+  link_pub_name = ns_name + "/" + joint_name + "/state";
+>>>>>>> 2bfa08a76069721e8b4fe10c48d1ddccbe94bd32
 
   // Compose string for the subscriber of external torque
   ext_tau_sub_name = ns_name + "/" + joint_name + "/ext_tau";
 
   // Subscribers and Publishers for the joint states and command
   sub = n.subscribe(cmd_sub_name, 10, &seaPlugin::getRef_callback, this);
+<<<<<<< HEAD
+=======
+  //pub = n.advertise<std_msgs::Float64>(cmd_pub_name, 500);
+>>>>>>> 2bfa08a76069721e8b4fe10c48d1ddccbe94bd32
 
   if (this->flag_sub_ext_tau)
   {
@@ -72,10 +87,13 @@ void seaPlugin::Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
   {
     pub_state = n.advertise<sea_plugin::state_info>(link_pub_name, 500);
   }
+<<<<<<< HEAD
   if (this->flag_pub_el_tau)
   {
     pub_eltau = n.advertise<std_msgs::Float64>(el_pub_name, 500);
   }
+=======
+>>>>>>> 2bfa08a76069721e8b4fe10c48d1ddccbe94bd32
 
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(boost::bind(&seaPlugin::OnUpdate, this, _1));  
 
@@ -97,22 +115,33 @@ void seaPlugin::getExtTau_callback(const std_msgs::Float64& e_tau)
 void seaPlugin::OnUpdate(const common::UpdateInfo & /*_info*/)
 {
   // Retrieve joint actual position
+<<<<<<< HEAD
   this->q = this->joint->GetAngle(0).Radian();
   this->dq = this->joint->GetVelocity(0);
 
   // Compute the elastic and link torques
   this->elastic_tau.data = this->K*(this->joint_ref.data - this->q);
   this->joint_tau.data = this->elastic_tau.data - this->Damp*this->dq;
+=======
+  this->q = this->joint->Position(0);
+  this->dq = this->joint->GetVelocity(0);
+
+  // Compute the elastic torque
+  this->joint_tau.data = this->K*(this->joint_ref.data - this->q) - this->Damp*this->dq;
+>>>>>>> 2bfa08a76069721e8b4fe10c48d1ddccbe94bd32
 
   // Set to the joint elastic torque
   this->joint->SetForce(0, this->joint_tau.data - this->ext_tau.data);
 
+<<<<<<< HEAD
   // Publish elastic torque for driving motor
   if (this->flag_pub_el_tau)
   {
     pub_eltau.publish(this->elastic_tau);
   }
 
+=======
+>>>>>>> 2bfa08a76069721e8b4fe10c48d1ddccbe94bd32
   // Publish whole joint state
   if (this->flag_pub_state)
   {
