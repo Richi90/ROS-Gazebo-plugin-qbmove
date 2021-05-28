@@ -27,10 +27,7 @@ namespace gazebo{
     std::string cmd_sub_name;
     std::string cmd_pub_name;
     std::string link_pub_name;
-<<<<<<< HEAD
     std::string el_pub_name;
-=======
->>>>>>> 2bfa08a76069721e8b4fe10c48d1ddccbe94bd32
 
     // Joint name and namespace retrieved from the urdf
     std::string joint_name;
@@ -52,22 +49,16 @@ namespace gazebo{
     ros::Publisher pub;     // for link position
     ros::Subscriber sub;    // for joint position reference
     ros::Publisher pub_state;// for link position
-<<<<<<< HEAD
     ros::Publisher pub_eltau;// for link position
-=======
->>>>>>> 2bfa08a76069721e8b4fe10c48d1ddccbe94bd32
     ros::Subscriber sub_ext;// for eternal torque
     ros::NodeHandle n;
     
     // Reference messages
     std_msgs::Float64 joint_ref;
 
-<<<<<<< HEAD
     // Elastic torque 
     std_msgs::Float64 elastic_tau;
-
-=======
->>>>>>> 2bfa08a76069721e8b4fe10c48d1ddccbe94bd32
+ 
     // Temporarly messages to publish
     std_msgs::Float64 joint_tau, ext_tau;
 
@@ -79,11 +70,8 @@ namespace gazebo{
     // Enable publish and subscribe to specific topics (default "false")
     bool flag_pub_state = "false";
     bool flag_sub_ext_tau = "false";
-<<<<<<< HEAD
     bool flag_pub_el_tau = "false";
-=======
->>>>>>> 2bfa08a76069721e8b4fe10c48d1ddccbe94bd32
-
+    
     // Custom message for joint info
     sea_plugin::state_info joint_info;
 

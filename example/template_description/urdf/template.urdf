@@ -58,7 +58,7 @@
         #      enable the subscription to external torque topic
 
     -->
-    <gazebo>
+<!--     <gazebo>
         <plugin name="advanced_vsa_j1" filename="libadvanced_plugin.so">
             <joint>joint1</joint>
             <control_type>1</control_type>
@@ -66,7 +66,7 @@
             <pub_state>true</pub_state>
             <sub_ext_tau>true</sub_ext_tau>
         </plugin>
-    </gazebo>
+    </gazebo> -->
 
     <!-- Legend for the libsea_plugin.so custom plugin 
     
@@ -77,8 +77,8 @@
     -->
     <gazebo>
         <plugin name="sea_j1" filename="libsea_plugin.so">
-            <joint>J1</joint>  
-            <namespace>your_ns</namespace>
+            <joint>joint1</joint>  
+            <namespace>template_robot</namespace>
             <stiffness>100</stiffness>
             <pub_eltau>true</pub_eltau>
             <pub_state>true</pub_state>
