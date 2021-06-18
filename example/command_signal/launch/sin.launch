@@ -1,0 +1,14 @@
+<launch>
+
+    <!-- Load the parameter from the configuration file -->
+    <rosparam command="load" file="$(find command_signal)/config/config_signals.yaml"/>
+    
+    <arg name="ns" default="template_robot"/>
+ <!--    <param name="/use_sim_time" value="true"/> -->
+
+    <!-- Run the measurement node -->
+    <node name="give_sin" pkg="command_signal" type="give_sin_node" respawn="false"
+          args="0"  output="screen">
+    </node>
+
+</launch>

@@ -1,2 +1,25 @@
 ## Namespace of the robot
 namespace: "template_robot"      # default = "toBEassigend"
+
+## Time parameters (in seconds)
+T_sample: 0.01       # sample time
+
+## Number of qbAdvance Motors
+joints_number: 3
+
+## Joints name
+joints_name: 
+ - "joint1"
+ - "joint2"
+ - "joint3"
+
+## topic names to which publish the references
+ref1_topic_name: 
+ - '/theta_command'
+ - '/theta_command'
+ - '/theta_command'
+
+ref2_topic_name: 
+ - '/'
+ - '/'
+ - '/'

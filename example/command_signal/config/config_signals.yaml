@@ -1,0 +1,14 @@
+## Number of cubes 
+n_joints: 3              # cubes number
+## Namespace of the robot
+namespace: "template_robot"    
+
+## Time parameters (in seconds)
+start_time: 5.0         # starting time of the signal
+stop_time: 10.0         # stopping time of the signal
+t_fin: 20.0             # total duration of the task
+T_sample: 0.01          # sample time
+
+# for sin signal
+sin_amplitude: 0.8     # amplitude of the sin signal
+sin_omega: 0.8         # frequency of the sin signal
